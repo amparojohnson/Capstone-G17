@@ -4,8 +4,8 @@ import psycopg2
 # Parámetros de conexión a la base de datos PostgreSQL
 conn = psycopg2.connect(
     dbname="tienda_de_mascotas",
-    user="amparojohnson",
-    password="Ratonfil1!",
+    user="martingodoytorres",
+    password="martinbacan!",
     host="localhost",
     port="5432"
 )
