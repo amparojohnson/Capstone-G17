@@ -1,0 +1,58 @@
+import pandas as pd
+
+# Cargar los datos desde el archivo CSV
+# Asegúrate de que la ruta del archivo sea correcta
+df = pd.read_csv('data_sales.csv', sep=';')
+
+# Convertir la columna 'date' a tipo datetime
+df['date'] = pd.to_datetime(df['date'])
+
+# Análisis mensual
+df['year_month'] = df['date'].dt.to_period('M')
+monthly_income = df.groupby('year_month')['total (CLP)'].sum().reset_index()
+monthly_income = monthly_income.sort_values('year_month')
+monthly_income.columns = ['Año-Mes', 'Ingresos Totales (CLP)']
+
+print("Ingresos mensuales:")
+print(monthly_income.to_string(index=False))
+print("\n")
+
+# Análisis por día de la semana
+df['day_of_week'] = df['date'].dt.day_name()
+daily_income = df.groupby('day_of_week')['total (CLP)'].sum().reset_index()
+
+days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+daily_income['day_of_week'] = pd.Categorical(daily_income['day_of_week'], categories=days_order, ordered=True)
+daily_income = daily_income.sort_values('day_of_week')
+
+day_translation = {
+    'Monday': 'LUNES',
+    'Tuesday': 'MARTES',
+    'Wednesday': 'MIÉRCOLES',
+    'Thursday': 'JUEVES',
+    'Friday': 'VIERNES',
+    'Saturday': 'SÁBADO',
+    'Sunday': 'DOMINGO'
+}
+daily_income['day_of_week'] = daily_income['day_of_week'].map(day_translation)
+
+daily_income.columns = ['Día de la Semana', 'Ingresos Totales (CLP)']
+
+print("Ingresos por día de la semana:")
+print(daily_income.to_string(index=False))
+print("\n")
+
+# Encontrar la fecha con el mayor y menor ingreso
+date_income = df.groupby('date')['total (CLP)'].sum().reset_index()
+max_income_date = date_income.loc[date_income['total (CLP)'].idxmax()]
+min_income_date = date_income.loc[date_income['total (CLP)'].idxmin()]
+
+print(f"Fecha con mayor ingreso: {max_income_date['date'].strftime('%Y-%m-%d')}")
+print(f"Ingreso: {max_income_date['total (CLP)']:,.2f} CLP")
+print(f"\nFecha con menor ingreso: {min_income_date['date'].strftime('%Y-%m-%d')}")
+print(f"Ingreso: {min_income_date['total (CLP)']:,.2f} CLP")
+
+# Si quieres guardar los resultados en archivos CSV, descomenta las siguientes líneas:
+# monthly_income.to_csv('ingresos_mensuales.csv', index=False)
+# daily_income.to_csv('ingresos_por_dia.csv', index=False)
+# date_income.to_csv('ingresos_por_fecha.csv', index=False)
