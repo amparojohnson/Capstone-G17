@@ -1,0 +1,61 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
+import seaborn as sns
+
+# Configurar el estilo de seaborn para gráficos más atractivos
+sns.set_style("whitegrid")
+
+# Cargar los datos desde el archivo CSV
+# Asegúrate de que la ruta del archivo sea correcta
+df = pd.read_csv('data_sales.csv', sep=';')
+
+# Convertir la columna 'date' a tipo datetime
+df['date'] = pd.to_datetime(df['date'])
+
+# Crear una columna con el año y mes
+df['year_month'] = df['date'].dt.to_period('M')
+
+# Agrupar por año y mes, sumar los totales
+monthly_income = df.groupby('year_month')['total (CLP)'].sum().reset_index()
+
+# Excluir el último mes
+monthly_income = monthly_income.iloc[:-1]
+
+# Convertir 'year_month' a datetime para el eje x del gráfico
+monthly_income['year_month'] = monthly_income['year_month'].dt.to_timestamp()
+
+# Crear el gráfico
+plt.figure(figsize=(12, 6))
+plt.plot(monthly_income['year_month'], monthly_income['total (CLP)'], marker='o')
+
+# Configurar el eje x para mostrar las fechas de manera legible
+plt.gca().xaxis.set_major_formatter(DateFormatter('%Y-%m'))
+plt.gcf().autofmt_xdate()  # Rotar y alinear las etiquetas de fecha
+
+# Añadir títulos y etiquetas
+plt.title('Ingresos Mensuales (excluyendo el último mes)', fontsize=16)
+plt.xlabel('Fecha', fontsize=12)
+plt.ylabel('Ingresos Totales (CLP)', fontsize=12)
+
+# Añadir separadores de miles al eje y
+plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format(int(x), ',')))
+
+# Ajustar los márgenes
+plt.tight_layout()
+
+# Guardar el gráfico como imagen
+plt.savefig('ingresos_mensuales_sin_ultimo_mes.png', dpi=300)
+
+print("El gráfico ha sido guardado como 'ingresos_mensuales_sin_ultimo_mes.png'")
+
+# Opcionalmente, mostrar el gráfico
+# plt.show()
+
+# Imprimir información sobre el rango de fechas incluido
+print(f"Rango de fechas incluido en el gráfico:")
+print(f"Desde: {monthly_income['year_month'].min().strftime('%Y-%m')}")
+print(f"Hasta: {monthly_income['year_month'].max().strftime('%Y-%m')}")
+
+# Opcionalmente, guardar los datos mensuales en un archivo CSV
+# monthly_income.to_csv('ingresos_mensuales_sin_ultimo_mes.csv', index=False)

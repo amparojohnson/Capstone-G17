@@ -1,0 +1,22 @@
+import csv
+
+def filter_csv_by_stock(input_file, output_file):
+    with open(input_file, 'r', newline='', encoding='utf-8') as infile, \
+         open(output_file, 'w', newline='', encoding='utf-8') as outfile:
+        
+        reader = csv.DictReader(infile)
+        fieldnames = reader.fieldnames
+        
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for row in reader:
+            if row['stock'] and row['stock'].strip():
+                writer.writerow(row)
+
+# Usar la función
+input_file = 'data_items.csv'  # Asegúrate de que este sea el nombre correcto de tu archivo de entrada
+output_file = 'items_filtrados_stock.csv'
+
+filter_csv_by_stock(input_file, output_file)
+print(f"Archivo filtrado creado: {output_file}")
